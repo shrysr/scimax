@@ -399,11 +399,14 @@ define the definitions."
 (defcustom scimax-save-spellcheck-abbrevs t
   "If t save spellchecks as global-abbrevs.")
 
+;; Note this redefines an alias in flyspell-correct that points to
+;; `flyspell-correct-previous'.
 (defun flyspell-correct-previous-word-generic (position)
   "Correct the first misspelled word that occurs before point.
 But don't look beyond what's visible on the screen.
 
-Uses `flyspell-correct-word-generic' function for correction."
+Uses `flyspell-correct-at-point' if installed or
+`flyspell-correct-word-generic' function for correction."
   (interactive "d")
   (let ((top (window-start))
         (bot (window-end))
@@ -436,7 +439,10 @@ Uses `flyspell-correct-word-generic' function for correction."
               (goto-char incorrect-word-pos)
 	      (let (bef aft)
 		(setq bef (word-at-point))
-		(flyspell-correct-word-generic)
+		;; See issue https://github.com/jkitchin/scimax/issues/336
+		(if (fboundp 'flyspell-correct-at-point)
+		    (flyspell-correct-at-point)
+		  (flyspell-correct-word-generic))
 		(goto-char incorrect-word-pos)
 		(setq aft (word-at-point))
 		(when (and scimax-save-spellcheck-abbrevs

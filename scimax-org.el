@@ -5,7 +5,6 @@
 
 ;;; Code:
 (require 'org)
-(require 'ox-latex)
 (require 'org-inlinetask)
 (require 'org-mouse)
 (require 'org-ref)
@@ -59,6 +58,7 @@
 	     (cons "q" (lambda ()
 			 (avy-with avy-goto-line
 			   (avy--generic-jump "^\\*+" nil avy-style)))))
+
 
 (defun org-teleport (&optional arg)
   "Teleport the current heading to after a headline selected with avy.
@@ -163,82 +163,6 @@ is positive, move after, and if negative, move before."
     ;; and last a global todo list
     (todo "TODO"))))
 
-;; * Block templates
-
-;; org 9.2 changed the template engine. It doesn't seem possible to use it as a
-;; general templating engine anymore that is mostly for inserting blocks.
-;; (when (version< (org-version) "9.2")
-;;   ;; add <p for python expansion
-;;   (add-to-list 'org-structure-template-alist
-;; 	       '("p" "#+BEGIN_SRC python :results output org drawer\n?\n#+END_SRC"
-;; 		 "<src lang=\"python\">\n?\n</src>"))
-
-;;   ;; add <por for python expansion with raw output
-;;   (add-to-list 'org-structure-template-alist
-;; 	       '("por" "#+BEGIN_SRC python :results output raw\n?\n#+END_SRC"
-;; 		 "<src lang=\"python\">\n?\n</src>"))
-
-;;   ;; add <pv for python expansion with value
-;;   (add-to-list 'org-structure-template-alist
-;; 	       '("pv" "#+BEGIN_SRC python :results value\n?\n#+END_SRC"
-;; 		 "<src lang=\"python\">\n?\n</src>"))
-
-;;   ;; add <el for emacs-lisp expansion
-;;   (add-to-list 'org-structure-template-alist
-;; 	       '("el" "#+BEGIN_SRC emacs-lisp\n?\n#+END_SRC"
-;; 		 "<src lang=\"emacs-lisp\">\n?\n</src>"))
-
-;;   (add-to-list 'org-structure-template-alist
-;; 	       '("ell" "#+BEGIN_SRC emacs-lisp :lexical t\n?\n#+END_SRC"
-;; 		 "<src lang=\"emacs-lisp\">\n?\n</src>"))
-
-;;   ;; add <sh for shell
-;;   (add-to-list 'org-structure-template-alist
-;; 	       '("sh" "#+BEGIN_SRC sh\n?\n#+END_SRC"
-;; 		 "<src lang=\"shell\">\n?\n</src>"))
-
-;;   (add-to-list 'org-structure-template-alist
-;; 	       '("lh" "#+latex_header: " ""))
-
-;;   (add-to-list 'org-structure-template-alist
-;; 	       '("lc" "#+latex_class: " ""))
-
-;;   (add-to-list 'org-structure-template-alist
-;; 	       '("lco" "#+latex_class_options: " ""))
-
-;;   (add-to-list 'org-structure-template-alist
-;; 	       '("ao" "#+attr_org: " ""))
-
-;;   (add-to-list 'org-structure-template-alist
-;; 	       '("al" "#+attr_latex: " ""))
-
-;;   (add-to-list 'org-structure-template-alist
-;; 	       '("ca" "#+caption: " ""))
-
-;;   (add-to-list 'org-structure-template-alist
-;; 	       '("tn" "#+tblname: " ""))
-
-;;   (add-to-list 'org-structure-template-alist
-;; 	       '("n" "#+name: " ""))
-
-;;   (add-to-list 'org-structure-template-alist
-;; 	       '("o" "#+options: " ""))
-
-;;   (add-to-list 'org-structure-template-alist
-;; 	       '("ti" "#+title: " ""))
-
-;;   ;; table expansions
-;;   (loop for i from 1 to 6
-;; 	do
-;; 	(let ((template (make-string i ?t))
-;; 	      (expansion (concat "|"
-;; 				 (mapconcat
-;; 				  'identity
-;; 				  (loop for j to i collect "   ")
-;; 				  "|"))))
-;; 	  (setf (substring expansion 2 3) "?")
-;; 	  (add-to-list 'org-structure-template-alist
-;; 		       `(,template ,expansion "")))))
 
 ;; * Babel settings
 ;; enable prompt-free code running
@@ -345,303 +269,194 @@ is positive, move after, and if negative, move before."
 	  'scimax-align-result-table)
 
 
-;; * Latex Export settings
-
-;; Interpret "_" and "^" for export when braces are used.
-(setq org-export-with-sub-superscripts '{})
-
-(setq org-latex-default-packages-alist
-      '(("AUTO" "inputenc" t)
-	("" "lmodern" nil)
-	("T1" "fontenc" t)
-	("" "fixltx2e" nil)
-	("" "graphicx" t)
-	("" "longtable" nil)
-	("" "float" nil)
-	("" "wrapfig" nil)
-	("" "rotating" nil)
-	("normalem" "ulem" t)
-	("" "amsmath" t)
-	("" "textcomp" t)
-	("" "marvosym" t)
-	("" "wasysym" t)
-	("" "amssymb" t)
-	("" "amsmath" t)
-	("theorems, skins" "tcolorbox" t)
-	("version=3" "mhchem" t)
-	("numbers,super,sort&compress" "natbib" nil)
-	("" "natmove" nil)
-	("" "url" nil)
-	("" "minted" nil)
-	("" "underscore" nil)
-	("linktocpage,pdfstartview=FitH,colorlinks,
-linkcolor=blue,anchorcolor=blue,
-citecolor=blue,filecolor=blue,menucolor=blue,urlcolor=blue"
-	 "hyperref" nil)
-	("" "attachfile" nil)))
-
-;; do not put in \hypersetup. Use your own if you want it e.g.
-;; \hypersetup{pdfkeywords={%s},\n pdfsubject={%s},\n pdfcreator={%}}
-(setq org-latex-with-hyperref nil)
-
-;; this is for code syntax highlighting in export. you need to use
-;; -shell-escape with latex, and install pygments.
-(setq org-latex-listings 'minted)
-(setq org-latex-minted-options
-      '(("frame" "lines")
-	("fontsize" "\\scriptsize")
-	("linenos" "")))
-
-;; avoid getting \maketitle right after begin{document}
-;; you should put \maketitle if and where you want it.
-(setq org-latex-title-command "")
-
-(setq org-latex-prefer-user-labels t)
-
-;; ** Custom new classes
-;; customized article. better margins
-(add-to-list 'org-latex-classes
-	     '("article-1"                          ;class-name
-	       "\\documentclass{article}
-\\usepackage[top=1in, bottom=1.in, left=1in, right=1in]{geometry}
- [PACKAGES]
- [EXTRA]" ;;header-string
-	       ("\\section{%s}" . "\\section*{%s}")
-	       ("\\subsection{%s}" . "\\subsection*a{%s}")
-	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-	       ("\\paragraph{%s}" . "\\paragraph*{%s}")
-	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
-
-;; This is for when you don't want any default packages, and you want
-;; to declare them all yourself.
-(add-to-list 'org-latex-classes
-	     '("article-no-defaults"                          ;class-name
-	       "\\documentclass{article}
- [NO-DEFAULT-PACKAGES]
- [PACKAGES]
- [EXTRA]" ;;header-string
-	       ("\\section{%s}" . "\\section*{%s}")
-	       ("\\subsection{%s}" . "\\subsection*a{%s}")
-	       ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
-	       ("\\paragraph{%s}" . "\\paragraph*{%s}")
-	       ("\\subparagraph{%s}" . "\\subparagraph*{%s}")))
-
-
-;; * Fragment overlays
-
-(defun org-latex-fragment-tooltip (beg end image imagetype)
-  "Add the fragment tooltip to the overlay and set click function to toggle it."
-  (overlay-put (ov-at) 'help-echo
-	       (concat (buffer-substring beg end)
-		       "\nmouse-1 to toggle."))
-  (overlay-put (ov-at) 'local-map (let ((map (make-sparse-keymap)))
-				    (define-key map (kbd "C-c C-x C-l") 'org-toggle-latex-fragment)
-				    (define-key map [mouse-1]
-				      `(lambda ()
-					 (interactive)
-					 (org-remove-latex-fragment-image-overlays ,beg ,end)))
-				    map)))
-
-(advice-add 'org--format-latex-make-overlay :after 'org-latex-fragment-tooltip)
-
-(defun org-latex-fragment-justify (justification)
-  "Justify the latex fragment at point with JUSTIFICATION.
-JUSTIFICATION is a symbol for 'left, 'center or 'right."
-  (interactive
-   (list (intern-soft
-          (completing-read "Justification (left): " '(left center right)
-                           nil t nil nil 'left))))
-
-  (let* ((ov (ov-at))
-	 (beg (ov-beg ov))
-	 (end (ov-end ov))
-	 (shift (- beg (line-beginning-position)))
-	 (img (overlay-get ov 'display))
-	 (img (and (and img (consp img) (eq (car img) 'image)
-			(image-type-available-p (plist-get (cdr img) :type)))
-		   img))
-	 space-left offset)
-    (when (and img
-	       ;; This means the equation is at the start of the line
-	       (= beg (line-beginning-position))
-	       (or
-		(string= "" (s-trim (buffer-substring end (line-end-position))))
-		(eq 'latex-environment (car (org-element-context)))))
-      (setq space-left (- (window-max-chars-per-line) (car (image-size img)))
-	    offset (floor (cond
-			   ((eq justification 'center)
-			    (- (/ space-left 2) shift))
-			   ((eq justification 'right)
-			    (- space-left shift))
-			   (t
-			    0))))
-      (when (>= offset 0)
-	(overlay-put ov 'before-string (make-string offset ?\ ))))))
-
-(defun org-latex-fragment-justify-advice (beg end image imagetype)
-  "After advice function to justify fragments."
-  (org-latex-fragment-justify (or (plist-get org-format-latex-options :justify) 'left)))
-
-(advice-add 'org--format-latex-make-overlay :after 'org-latex-fragment-justify-advice)
-
-;; ** numbering latex equations
-
-;; Numbered equations all have (1) as the number for fragments with vanilla
-;; org-mode. This code injects the correct numbers into the previews so they
-;; look good.
-(defun org-renumber-environment (orig-func &rest args)
-  "A function to inject numbers in LaTeX fragment previews."
-  (let ((results '())
-	(counter -1)
-	(numberp))
-
-    (setq results (loop for (begin .  env) in
-			(org-element-map (org-element-parse-buffer) 'latex-environment
-			  (lambda (env)
-			    (cons
-			     (org-element-property :begin env)
-			     (org-element-property :value env))))
-			collect
-			(cond
-			 ((and (string-match "\\\\begin{equation}" env)
-			       (not (string-match "\\\\tag{" env)))
-			  (incf counter)
-			  (cons begin counter))
-			 ((string-match "\\\\begin{align}" env)
-			  (prog2
-			      (incf counter)
-			      (cons begin counter)
-			    (with-temp-buffer
-			      (insert env)
-			      (goto-char (point-min))
-			      ;; \\ is used for a new line. Each one leads to a number
-			      (incf counter (count-matches "\\\\$"))
-			      ;; unless there are nonumbers.
-			      (goto-char (point-min))
-			      (decf counter (count-matches "\\nonumber")))))
-			 (t
-			  (cons begin nil)))))
-
-    (when (setq numberp (cdr (assoc (point) results)))
-      (setf (car args)
-	    (concat
-	     (format "\\setcounter{equation}{%s}\n" numberp)
-	     (car args)))))
-
-  (apply orig-func args))
-
-(advice-add 'org-create-formula-image :around #'org-renumber-environment)
-
-(defun org-inject-latex-fragment (orig-func &rest args)
-  "Advice function to inject latex code before and/or after the equation in a latex fragment.
-You can use this to set \\mathversion{bold} for example to make it bolder."
-  (setf (car args)
-	(concat
-	 (or (plist-get org-format-latex-options :latex-fragment-pre-body) "")
-	 (car args)
-	 (or (plist-get org-format-latex-options :latex-fragment-post-body) "")))
-  (apply orig-func args))
-
-(advice-add 'org-create-formula-image :around #'org-inject-latex-fragment )
 
 
 ;; * Markup commands for org-mode
-(loop for (type beginning-marker end-marker)
-      in '((subscript "_{" "}")
-	   (superscript "^{" "}")
-	   (italics "/" "/")
-	   (bold "*" "*")
-	   (verbatim "=" "=")
-	   (code "~" "~")
-	   (underline "_" "_")
-	   (strikethrough "+" "+"))
-      do
-      (eval `(defun ,(intern (format "org-%s-region-or-point" type)) ()
-	       ,(format "%s the region, word or character at point"
-			(upcase (symbol-name type)))
-	       (interactive)
-	       (cond
-		;; We have an active region we want to apply
-		((region-active-p)
-		 (let* ((bounds (list (region-beginning) (region-end)))
-			(start (apply 'min bounds))
-			(end (apply 'max bounds))
-			(lines))
-		   (unless (memq ',type '(subscript superscript))
-		     (save-excursion
-		       (goto-char start)
-		       (unless (looking-at " \\|\\<")
-			 (backward-word)
-			 (setq start (point)))
-		       (goto-char end)
-		       (unless (looking-at " \\|\>")
-			 (forward-word)
-			 (setq end (point)))))
-		   (setq lines
-			 (s-join "\n" (mapcar
-				       (lambda (s)
-					 (if (not (string= (s-trim s) ""))
-					     (concat ,beginning-marker
-						     (s-trim s)
-						     ,end-marker)
-					   s))
-				       (split-string
-					(buffer-substring start end) "\n"))))
-		   (setf (buffer-substring start end) lines)
-		   (forward-char (length lines))))
-		;; We are on a word with no region selected
-		((thing-at-point 'word)
-		 (cond
-		  ;; beginning of a word
-		  ((looking-back " " 1)
-		   (insert ,beginning-marker)
-		   (re-search-forward "\\>")
-		   (insert ,end-marker))
-		  ;; end of a word
-		  ((looking-back "\\>" 1)
-		   (insert ,(concat beginning-marker end-marker))
-		   (backward-char ,(length end-marker)))
-		  ;; not at start or end, so we just sub/sup the character at point
-		  ((memq ',type '(subscript superscript))
-		   (insert ,beginning-marker)
-		   (forward-char ,(- (length beginning-marker) 1))
-		   (insert ,end-marker))
-		  ;; somewhere else in a word, and handled sub/sup. mark up the
-		  ;; whole word.
-		  (t
-		   (re-search-backward "\\<")
-		   (insert ,beginning-marker)
-		   (re-search-forward "\\>")
-		   (insert ,end-marker))))
-		;; not at a word or region, insert markers and put point between
-		;; them.
-		(t
-		 (insert ,(concat beginning-marker end-marker))
-		 (backward-char ,(length end-marker)))))))
+
+
+(defun org-markup-region-or-point (type beginning-marker end-marker)
+  "Apply the markup TYPE with BEGINNING-MARKER and END-MARKER to region, word or point.
+This is a generic function used to apply markups. It is mostly
+the same for the markups, but there are some special cases for
+subscripts and superscripts."
+  (cond
+   ;; We have an active region we want to apply
+   ((region-active-p)
+    (let* ((bounds (list (region-beginning) (region-end)))
+	   (start (apply 'min bounds))
+	   (end (apply 'max bounds))
+	   (lines))
+      (unless (memq type '(subscript superscript))
+	(save-excursion
+	  (goto-char start)
+	  (unless (looking-at " \\|\\<")
+	    (backward-word)
+	    (setq start (point)))
+	  (goto-char end)
+	  (unless (or (looking-at " \\|\\>")
+		      (looking-back "\\>" 1))
+	    (forward-word)
+	    (setq end (point)))))
+      (setq lines
+	    (s-join "\n" (mapcar
+			  (lambda (s)
+			    (if (not (string= (s-trim s) ""))
+				(concat beginning-marker
+					(s-trim s)
+					end-marker)
+			      s))
+			  (split-string
+			   (buffer-substring start end) "\n"))))
+      (setf (buffer-substring start end) lines)
+      (forward-char (length lines))))
+   ;; We are on a word with no region selected
+   ((thing-at-point 'word)
+    (cond
+     ;; beginning of a word
+     ((looking-back " " 1)
+      (insert beginning-marker)
+      (re-search-forward "\\>")
+      (insert end-marker))
+     ;; end of a word
+     ((looking-back "\\>" 1)
+      (insert (concat beginning-marker end-marker))
+      (backward-char (length end-marker)))
+     ;; not at start or end so we just sub/sup the character at point
+     ((memq type '(subscript superscript))
+      (insert beginning-marker)
+      (forward-char (- (length beginning-marker) 1))
+      (insert end-marker))
+     ;; somewhere else in a word and handled sub/sup. mark up the
+     ;; whole word.
+     (t
+      (re-search-backward "\\<")
+      (insert beginning-marker)
+      (re-search-forward "\\>")
+      (insert end-marker))))
+   ;; not at a word or region insert markers and put point between
+   ;; them.
+   (t
+    (insert (concat beginning-marker end-marker))
+    (backward-char (length end-marker)))))
+
+
+(defun org-italics-region-or-point ()
+  "Italicize the region, word or character at point.
+This function tries to do what you mean:
+1. If you select a region, markup the region.
+2. If in a word, markup the word.
+3. Otherwise wrap the character at point in the markup."
+  (interactive)
+  (org-markup-region-or-point 'italics "/" "/"))
+
+
+(defun org-bold-region-or-point ()
+  "Bold the region, word or character at point.
+This function tries to do what you mean:
+1. If you select a region, markup the region.
+2. If in a word, markup the word.
+3. Otherwise wrap the character at point in the markup."
+  (interactive)
+  (org-markup-region-or-point 'bold "*" "*"))
+
+
+(defun org-underline-region-or-point ()
+  "Underline the region, word or character at point.
+This function tries to do what you mean:
+1. If you select a region, markup the region.
+2. If in a word, markup the word.
+3. Otherwise wrap the character at point in the markup."
+  (interactive)
+  (org-markup-region-or-point 'underline "_" "_"))
+
+
+(defun org-code-region-or-point ()
+  "Mark the region, word or character at point as code.
+This function tries to do what you mean:
+1. If you select a region, markup the region.
+2. If in a word, markup the word.
+3. Otherwise wrap the character at point in the markup."
+  (interactive)
+  (org-markup-region-or-point 'underline "~" "~"))
+
+
+(defun org-verbatim-region-or-point ()
+  "Mark the region, word or character at point as verbatim.
+This function tries to do what you mean:
+1. If you select a region, markup the region.
+2. If in a word, markup the word.
+3. Otherwise wrap the character at point in the markup."
+  (interactive)
+  (org-markup-region-or-point 'underline "=" "="))
+
+
+(defun org-strikethrough-region-or-point ()
+  "Mark the region, word or character at point as strikethrough.
+This function tries to do what you mean:
+1. If you select a region, markup the region.
+2. If in a word, markup the word.
+3. Otherwise wrap the character at point in the markup."
+  (interactive)
+  (org-markup-region-or-point 'strikethrough "+" "+"))
+
+
+(defun org-subscript-region-or-point ()
+  "Mark the region, word or character at point as a subscript.
+This function tries to do what you mean:
+1. If you select a region, markup the region.
+2. If in a word, markup the word.
+3. Otherwise wrap the character at point in the markup."
+  (interactive)
+  (org-markup-region-or-point 'subscript "_{" "}"))
+
+
+(defun org-superscript-region-or-point ()
+  "Mark the region, word or character at point as superscript.
+This function tries to do what you mean:
+1. If you select a region, markup the region.
+2. If in a word, markup the word.
+3. Otherwise wrap the character at point in the markup."
+  (interactive)
+  (org-markup-region-or-point 'superscript "^{" "}"))
+
 
 (defun org-latex-math-region-or-point (&optional arg)
   "Wrap the selected region in latex math markup.
 \(\) or $$ (with prefix ARG) or @@latex:@@ with double prefix.
-Or insert those and put point in the middle to add an equation."
+With no region selected, insert those and put point in the middle
+to add an equation. Finally, if you are between these markers
+then exit them."
   (interactive "P")
-  (let ((chars
-	 (cond
-	  ((null arg)
-	   '("\\(" . "\\)"))
-	  ((equal arg '(4))
-	   '("$" . "$"))
-	  ((equal arg '(16))
-	   '("@@latex:" . "@@")))))
-    (if (region-active-p)
-	(progn
-	  (goto-char (region-end))
-	  (insert (cdr chars))
-	  (goto-char (region-beginning))
-	  (insert (car chars)))
-      (insert (concat  (car chars) (cdr chars)))
-      (backward-char (length (cdr chars))))))
-
-
+  (if (memq 'org-latex-and-related (get-char-property (point) 'face))
+      ;; in a fragment, let's get out.
+      (goto-char (or (next-single-property-change (point) 'face) (line-end-position)))
+    (let ((chars
+	   (cond
+	    ((null arg)
+	     '("\\(" . "\\)"))
+	    ((equal arg '(4))
+	     '("$" . "$"))
+	    ((equal arg '(16))
+	     '("@@latex:" . "@@")))))
+      (if (region-active-p)
+	  ;; wrap region
+	  (progn
+	    (goto-char (region-end))
+	    (insert (cdr chars))
+	    (goto-char (region-beginning))
+	    (insert (car chars)))
+	(cond
+	 ((thing-at-point 'word)
+	  (save-excursion
+	    (end-of-thing 'word)
+	    (insert (cdr chars)))
+	  (save-excursion
+	    (beginning-of-thing 'word)
+	    (insert (car chars)))
+	  (forward-char (length (car chars))))
+	 (t
+	  (insert (concat  (car chars) (cdr chars)))
+	  (backward-char (length (cdr chars)))))))))
 
 
 (defun helm-insert-org-entity ()
@@ -733,10 +548,6 @@ F5 inserts the entity code."
 			     (insert (cl-sixth (cdr candidate))) "Latin-1")))))
 
 
-;; * Font-lock
-;; ** Latex fragments
-(setq org-highlight-latex-and-related '(latex script entities))
-(set-face-foreground 'org-latex-and-related "blue")
 
 ;; * New org links
 
@@ -993,160 +804,6 @@ Use a prefix arg FONTIFY for colored headlines."
 
 (require 'scimax-org-babel-python)
 
-;; * Rescaling inline-images
-;; This will eventually be obsolete if this makes it into org-mode
-(defvar org-inline-image-resize-function
-  #'org-inline-image-resize
-  "Function that takes a filename and resize argument and returns
- a new filename pointing to the resized image.")
-
-
-(defun org-inline-image-resize (fname resize-options)
-  "Resize FNAME with RESIZE-OPTIONS.
-RESIZE-OPTIONS are passed to \"mogrify resized-fname -resize resize-options\".
-RESIZE-OPTIONS could be:
-
-N% to scale the image by a percentage.
-N to set the width, keeping the aspect ratio constant.
-xN to set the height, keeping the aspect ratio constant.
-NxM! to set the width and height, ignoring the aspect ratio.
-
-See http://www.imagemagick.org/Usage/resize/#resize for more options."
-  (let* ((md5-hash (with-temp-buffer (insert-file-contents fname)
-				     (insert (format "%s" resize-options))
-				     (md5 (buffer-string))))
-	 (resized-fname (concat (expand-file-name
-				 md5-hash
-				 temporary-file-directory)
-				"."
-				(file-name-extension fname)))
-	 (cmd (format "mogrify -resize %s %s"
-		      resize-options
-		      resized-fname)))
-    (if (not (executable-find "mogrify"))
-	(progn
-	  (message "No mogrify executable found. To eliminate this message, set  `org-inline-image-resize-function' to nil or install imagemagick from http://www.imagemagick.org/script/binary-releases.php")
-	  fname)
-      (unless (file-exists-p resized-fname)
-	(copy-file fname resized-fname)
-	(shell-command cmd))
-      resized-fname)))
-
-
-;; this is copied and modified from org.el
-(defun org-display-inline-images (&optional include-linked refresh beg end)
-  "Display inline images.
-
-An inline image is a link which follows either of these
-conventions:
-
-  1. Its path is a file with an extension matching return value
-     from `image-file-name-regexp' and it has no contents.
-
-  2. Its description consists in a single link of the previous
-     type.
-
-When optional argument INCLUDE-LINKED is non-nil, also links with
-a text description part will be inlined.  This can be nice for
-a quick look at those images, but it does not reflect what
-exported files will look like.
-
-When optional argument REFRESH is non-nil, refresh existing
-images between BEG and END.  This will create new image displays
-only if necessary.  BEG and END default to the buffer
-boundaries."
-  (interactive "P")
-  (when (display-graphic-p)
-    (unless refresh
-      (org-remove-inline-images)
-      (when (fboundp 'clear-image-cache) (clear-image-cache)))
-    (org-with-wide-buffer
-     (goto-char (or beg (point-min)))
-     (let ((case-fold-search t)
-	   (file-extension-re (image-file-name-regexp)))
-       (while (re-search-forward "[][]\\[\\(?:file\\|[./~]\\)" end t)
-	 (let ((link (save-match-data (org-element-context))))
-	   ;; Check if we're at an inline image.
-	   (when (and (equal (org-element-property :type link) "file")
-		      (or include-linked
-			  (not (org-element-property :contents-begin link)))
-		      (let ((parent (org-element-property :parent link)))
-			(or (not (eq (org-element-type parent) 'link))
-			    (not (cdr (org-element-contents parent)))))
-		      (org-string-match-p file-extension-re
-					  (org-element-property :path link)))
-	     (let ((file (expand-file-name
-			  (org-link-unescape
-			   (org-element-property :path link)))))
-	       (when (file-exists-p file)
-		 (let ((width
-			;; Apply `org-image-actual-width' specifications.
-			(cond
-			 ((and (not (image-type-available-p 'imagemagick))
-			       (not org-inline-image-resize-function))
-			  nil)
-			 ((eq org-image-actual-width t) nil)
-			 ((listp org-image-actual-width)
-			  (or
-			   ;; First try to find a width among
-			   ;; attributes associated to the paragraph
-			   ;; containing link.
-			   (let* ((paragraph
-				   (let ((e link))
-				     (while (and (setq e (org-element-property
-							  :parent e))
-						 (not (eq (org-element-type e)
-							  'paragraph))))
-				     e))
-				  (attr_org (org-element-property :attr_org paragraph)))
-			     (when attr_org
-			       (plist-get
-				(org-export-read-attribute :attr_org  paragraph) :width)))
-			   ;; Otherwise, fall-back to provided number.
-			   (car org-image-actual-width)))
-			 ((numberp org-image-actual-width)
-			  org-image-actual-width)))
-		       (old (get-char-property-and-overlay
-			     (org-element-property :begin link)
-			     'org-image-overlay)))
-		   (if (and (car-safe old) refresh)
-		       (image-refresh (overlay-get (cdr old) 'display))
-
-		     (when (and width org-inline-image-resize-function)
-		       (setq file (funcall  org-inline-image-resize-function file width)
-			     width nil))
-		     (let ((image (create-image file
-						(cond
-						 ((image-type-available-p 'imagemagick)
-						  (and width 'imagemagick))
-						 (t nil))
-						nil
-						:width width)))
-		       (when image
-			 (let* ((link
-				 ;; If inline image is the description
-				 ;; of another link, be sure to
-				 ;; consider the latter as the one to
-				 ;; apply the overlay on.
-				 (let ((parent
-					(org-element-property :parent link)))
-				   (if (eq (org-element-type parent) 'link)
-				       parent
-				     link)))
-				(ov (make-overlay
-				     (org-element-property :begin link)
-				     (progn
-				       (goto-char
-					(org-element-property :end link))
-				       (skip-chars-backward " \t")
-				       (point)))))
-			   (overlay-put ov 'display image)
-			   (overlay-put ov 'face 'default)
-			   (overlay-put ov 'org-image-overlay t)
-			   (overlay-put
-			    ov 'modification-hooks
-			    (list 'org-display-inline-remove-overlay))
-			   (push ov org-inline-image-overlays)))))))))))))))
 
 ;; * Enable pdf and eps images in org-mode
 ;; Suggested on the org-mode maillist by Julian Burgos
@@ -1307,14 +964,6 @@ Use a prefix arg to get regular RET. "
 	  (overlay-put ov 'numbered-heading t))))
 
 
-;; (define-minor-mode scimax-numbered-org-mode
-;;   "Minor mode to number org headings."
-;;   :init-value nil
-;;   (if scimax-numbered-org-mode
-;;       (scimax-overlay-numbered-headings)
-;;     (ov-clear 'numbered-heading)))
-
-
 (define-minor-mode scimax-numbered-org-mode
   "Minor mode to number org headings."
   :init-value nil
@@ -1335,188 +984,30 @@ Use a prefix arg to get regular RET. "
        `((fl-noh 0 nil))))))
 
 
-;;* Keymaps on src blocks
-
-(defcustom scimax-src-block-keymaps
-  '()
-  "alist of custom keymaps for src blocks."
-  :group :scimax)
-
-(setq scimax-src-block-keymaps
-      `(("ipython" . ,(let ((map (make-composed-keymap
-				  `(,elpy-mode-map ,python-mode-map ,pyvenv-mode-map)
-				  org-mode-map)))
-			;; In org-mode I define RET so we f
-			(define-key map (kbd "<return>") 'newline)
-			(define-key map (kbd "C-c C-c") 'org-ctrl-c-ctrl-c)
-			map))
-	("python" . ,(let ((map (make-composed-keymap
-				 `(,elpy-mode-map ,python-mode-map ,pyvenv-mode-map)
-				 org-mode-map)))
-		       ;; In org-mode I define RET so we f
-		       (define-key map (kbd "<return>") 'newline)
-		       (define-key map (kbd "C-c C-c") 'org-ctrl-c-ctrl-c)
-		       map))
-	("emacs-lisp" . ,(let ((map (make-composed-keymap `(,lispy-mode-map
-							    ,emacs-lisp-mode-map
-							    ,outline-minor-mode-map)
-							  org-mode-map)))
-			   (define-key map (kbd "C-c C-c") 'org-ctrl-c-ctrl-c)
-			   map))))
-
-(defun scimax-add-keymap-to-src-blocks (limit)
-  "Add keymaps to src-blocks defined in `scimax-src-block-keymaps'."
-  (let ((case-fold-search t)
-	lang)
-    (while (re-search-forward org-babel-src-block-regexp limit t)
-      (let ((lang (match-string 2))
-	    (beg (match-beginning 0))
-	    (end (match-end 0)))
-	(if (assoc (org-no-properties lang) scimax-src-block-keymaps)
-	    (progn
-	      (add-text-properties
-	       beg end `(local-map ,(cdr (assoc
-					  (org-no-properties lang)
-					  scimax-src-block-keymaps))))
-	      (add-text-properties
-	       beg end `(cursor-sensor-functions
-			 ((lambda (win prev-pos sym)
-			    ;; This simulates a mouse click and makes a menu change
-			    (org-mouse-down-mouse nil)))))))))))
+(use-package scimax-org-radio-checkbox
+  :ensure nil
+  :load-path scimax-dir)
 
 
-(defun scimax-spoof-mode (orig-func &rest args)
-  "Advice function to spoof commands in org-mode src blocks.
-It is for commands that depend on the major mode. One example is
-`lispy--eval'."
-  (if (org-in-src-block-p)
-      (let ((major-mode (intern (format "%s-mode" (first (org-babel-get-src-block-info))))))
-	(apply orig-func args))
-    (apply orig-func args)))
+(use-package scimax-org-latex
+  :load-path scimax-dir
+  :ensure nil
+  :config
+  (scimax-toggle-org-latex-fragment-tooltip)
+  (scimax-toggle-latex-fragment-justification)
+  (scimax-toggle-latex-equation-numbering)
+  (scimax-toggle-inject-latex))
 
 
-(define-minor-mode scimax-src-keymap-mode
-  "Minor mode to add mode keymaps to src-blocks."
-  :init-value nil
-  (if scimax-src-keymap-mode
-      (progn
-	(add-hook 'org-font-lock-hook #'scimax-add-keymap-to-src-blocks t)
-	(add-to-list 'font-lock-extra-managed-props 'local-map)
-	(add-to-list 'font-lock-extra-managed-props 'cursor-sensor-functions)
-	(advice-add 'lispy--eval :around 'scimax-spoof-mode)
-	(cursor-sensor-mode +1)
-	(message "scimax-src-keymap-mode enabled"))
-    (remove-hook 'org-font-lock-hook #'scimax-add-keymap-to-src-blocks)
-    (advice-remove 'lispy--eval 'scimax-spoof-mode)
-    (cursor-sensor-mode -1))
-  (font-lock-fontify-buffer))
+(use-package scimax-org-images
+  :ensure nil
+  :load-path scimax-dir)
 
-;; (add-hook 'org-mode-hook (lambda ()
-;; 			   (scimax-src-keymap-mode +1)))
+(use-package scimax-org-src-blocks
+  :ensure nil
+  :load-path scimax-dir
+  :config (scimax-org-toggle-colored-src-blocks))
 
-;; * radio checkboxes
-(defun scimax-in-radio-list-p ()
-  "Returns radio list if in one, else nil."
-  (interactive)
-  (let* ((element (org-element-context))
-	 (radio-list (cond
-		      ;; on an item. easy.
-		      ((and (eq 'item (car element))
-			    (-contains?
-			     (org-element-property
-			      :attr_org
-			      (org-element-property :parent element))
-			     ":radio"))
-		       (org-element-property :parent element))
-		      ;; on an item paragraph
-		      ((and (eq 'paragraph (car element))
-			    (eq 'item (car (org-element-property :parent element)))
-			    (-contains?
-			     (org-element-property
-			      :attr_org
-			      (org-element-property
-			       :parent
-			       (org-element-property :parent element)))
-			     ":radio"))
-		       (org-element-property
-			:parent
-			(org-element-property :parent element)))
-		      ;; not on an item or item paragraph
-		      (t
-		       nil))))
-    radio-list))
-
-(defun scimax-radio-CcCc ()
-  "Hook function for C-cC-c to work in radio checklists."
-  (interactive)
-  (let ((radio-list (scimax-in-radio-list-p))
-	(p (point)))
-    (when radio-list
-      ;; clear all boxes
-      (save-excursion
-	(loop for el in (org-element-property :structure radio-list)
-	      do
-	      (goto-char (car el))
-	      (when (re-search-forward "\\[X\\]" (line-end-position) t)
-		(replace-match "[ ]")))
-	;; Now figure out where to put the new X
-	(loop for el in (org-element-property :structure radio-list)
-	      do
-	      (when (and (> p (car el))
-			 (< p (car (last el))))
-		(goto-char (car el))
-		(when (re-search-forward "\\[ \\]" (line-end-position) t)
-		  (replace-match "[X]")))))
-      t)))
-
-(add-hook 'org-ctrl-c-ctrl-c-hook 'scimax-radio-CcCc)
-;; this works with mouse checking.
-(add-hook 'org-checkbox-statistics-hook 'scimax-radio-CcCc)
-
-(defun org-get-plain-list (name)
-  "Get the org-element representation of a plain-list named NAME."
-  (catch 'found
-    (org-element-map
-        (org-element-parse-buffer)
-        'plain-list
-      (lambda (plain-list)
-        (when
-            (string= name (org-element-property :name plain-list))
-          (throw 'found plain-list))))))
-
-(defun get-radio-list-value (name)
-  "Return the value of the checked item in a radio list named NAME."
-  (save-excursion
-    (loop for el in (org-element-property
-                     :structure
-                     (org-get-plain-list name))
-          if (string= (nth 4 el) "[X]")
-          return (progn
-                   (let ((item (buffer-substring (car el) (car (last el)))))
-                     (string-match "\\[X\\]\\(.*\\)$" item)
-                     (match-string-no-properties 1 item))))))
-
-;; * Fixing <> fontlock in src blocks
-;;
-;; this was broken so that if you had < or > in a src block it would break
-;; parens matching.
-
-(defun org-mode-<>-syntax-fix (start end)
-  (when (eq major-mode 'org-mode)
-    (save-excursion
-      (goto-char start)
-      (while (re-search-forward "<\\|>" end t)
-	(when (get-text-property (point) 'src-block)
-	  ;; This is a < or > in an org-src block
-	  (put-text-property (point) (1- (point))
-			     'syntax-table (string-to-syntax "_")))))))
-
-(defun scimax-fix-<>-syntax ()
-  (setq syntax-propertize-function 'org-mode-<>-syntax-fix)
-  (syntax-propertize (point-max)))
-
-(add-hook 'org-mode-hook
-	  #'scimax-fix-<>-syntax)
 
 ;; * The end
 (provide 'scimax-org)

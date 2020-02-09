@@ -123,7 +123,7 @@ A tooltip should tell you how to open the editmark.
 - sem-insert-file-editmark :: inserts an editmark from the last stored file
 
 This editmark has some limitations:
-1. It points to a location, and if you change the file, the location will not be the same as it was when you saved the link.
+1. If it points to a location, and if you change the file, the location will not be the same as it was when you saved the link.
 
 ** Audio
 
@@ -358,6 +358,9 @@ Export functions should take one argument, the backend as a symbol, and they are
  #+RESULTS:
  : sem-editmarks
 
+Some editmarks can have a plist in them containing metadata. Here we define how to read these. For now we assume that the content of an editmark is all a plist.
+
+
 #+BEGIN_SRC emacs-lisp
 (defun sem-editmark-plist ()
   "Read a plist in an editmark.
@@ -368,10 +371,12 @@ I assume the content of the edit mark is all a plist like this
 
 :keyword some values :next-keyword more values
 
-This way it is not necessary to put quotes on the values, so the plist above will end up as:
+This way it is not necessary to put quotes on the values, so the
+plist above will end up as:
  (:keyword \"some values\" :next-keyword \"more values\")
 
-Then, this gets read by elisp to make the plist. The downside of this is it is not feasible to have a key without a value."
+Then, this gets read by elisp to make the plist. The downside of
+this is it is not feasible to have a key without a value."
   (let* ((bounds (sem-editmark-bounds))
 	 (content-bounds (sem-content-bounds))
 	 (content (s-trim (buffer-substring-no-properties
@@ -460,7 +465,7 @@ File editmarks are a different way to link to a file than an org-link. There is 
 
 One day maybe I will try storing some context, e.g. for org files. There is a placeholder now, but it isn't great, just the characters around the point.
 
-Maybe an md5 hash too, so you can tell if the file has changed since the link was made.
+Another potential idea is an md5 hash, so you can tell if the file has changed since the link was made.
 
 #+BEGIN_SRC emacs-lisp
 (defvar sem-saved-file nil
@@ -721,7 +726,7 @@ we go with the font color."
 #+RESULTS:
 : sem-export-default
 
-** Fontlock
+** Font-lock
 
 The workhorse for fontification and property setting of editmarks is the font-lock engine.
 
@@ -792,7 +797,7 @@ The standard font-lock uses regexps for font-locking. We construct the regexp an
 
 ** Minor-mode for editmarks
 
-A minor mode is an easy way to turn font-locking on and off. All we do here is turn fontification on and off.
+A minor mode is an easy way to turn font-locking on and off. All we do here is turn fontification on and off. Note that if the editmarks conflict with pdf export (usually because of the color package), you can turn off sem-mode to prevent the export.
 
  #+BEGIN_SRC emacs-lisp
 (define-minor-mode sem-mode
@@ -803,7 +808,7 @@ A minor mode is an easy way to turn font-locking on and off. All we do here is t
 	(font-lock-remove-keywords
 	 nil
 	 (sem-font-lock-keywords))
-	(remove-hook 'org-export-before-processing-hook 'sem-editmarks-to-org))
+	(remove-hook 'org-export-before-processing-hook 'sem-editmarks-to-org t))
     (font-lock-add-keywords
      nil
      (sem-font-lock-keywords))
@@ -868,7 +873,7 @@ Return nil if not on an editmark."
   (when (get-text-property (point) 'sem-editmark)
     (cond
      ;; At the very beginning
-     ((not (get-text-property (- (point) 1) 'sem-editmark))
+     ((bobp)
       (cons (point) (next-single-property-change (point) 'sem-editmark)))
      (t
       (cons (or (previous-single-property-change (point) 'sem-editmark) (point))
@@ -1028,11 +1033,24 @@ TYPE should be a symbol corresponding to the car of an entry in `sem-editmarks'.
 	(backward-char (length (plist-get (cdr entry) :close-marker)))))))
   ;; Should we add a local variable so the file opens in sem-mode?
   (hack-local-variables)
-  (when (not (-contains?  file-local-variables-alist '(eval sem-mode)))
+  ;; This is more complicated than I thought it should be. When I try to just
+  ;; add a file-local variable, it often fails on new files because of some
+  ;; weird issue in comment-region. I hacked this together, and it seems more
+  ;; reliable.
+  (when (null file-local-variables-alist)
+    (let ((mode major-mode))
+      (save-excursion
+	(save-restriction
+	  (widen)
+	  (goto-char (point-max))
+	  (insert (with-temp-buffer
+		    (funcall mode)
+		    (insert "Local Variables:\nEnd:\n")
+		    (comment-region (point-min) (point-max))
+		    (buffer-string)))))))
+  (when (not (member '(eval sem-mode) file-local-variables-alist))
     (save-excursion
-      (save-restriction
-	(widen)
-	(add-file-local-variable 'eval '(sem-mode))))))
+      (add-file-local-variable 'eval '(sem-mode)))))
 #+END_SRC
 
 #+RESULTS:
@@ -1300,6 +1318,12 @@ editmark is the full text including the markers."
     (let ((editmarks '())
 	  bounds
 	  cem)
+      (when (get-text-property (point) 'sem-type)
+	(push (list (get-text-property (point) 'sem-type)
+		    (current-buffer)
+		    (setq bounds (sem-editmark-bounds))
+		    (buffer-substring-no-properties (car bounds) (cdr bounds)))
+	      editmarks))
       (while (setq cem (sem-next-editmark))
 	(setq bounds (sem-editmark-bounds))
 	(push (list (get-text-property (point) 'sem-type)

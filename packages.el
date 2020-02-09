@@ -302,10 +302,6 @@
   :ensure nil
   :load-path scimax-dir)
 
-(use-package scimax-org-colored-src-blocks
-  :ensure nil
-  :load-path scimax-dir)
-
 (use-package ov)
 
 (use-package pdf-tools)
@@ -537,7 +533,8 @@
 ;; 	       (expand-file-name "ov-highlight" scimax-dir))
 ;;   (require 'ov-highlight))
 
-(org-babel-load-file (expand-file-name "scimax-editmarks.org" scimax-dir))
+(let ((enable-local-variables nil))
+  (org-babel-load-file (expand-file-name "scimax-editmarks.org" scimax-dir)))
 
 ;; * User packages
 
